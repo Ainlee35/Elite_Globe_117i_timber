@@ -59,7 +59,7 @@ export default function Checkout() {
         <Navbar />
         <div className="flex flex-1 flex-col items-center justify-center gap-4 py-20">
           <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring" }}>
-            <CheckCircle2 className="h-20 w-20 text-green-500" />
+            <CheckCircle2 className="h-20 w-20 text-primary" />
           </motion.div>
           <h2 className="font-heading text-2xl font-bold">Order Placed Successfully!</h2>
           <p className="text-muted-foreground">Thank you for your order. You can track it from your orders page.</p>
