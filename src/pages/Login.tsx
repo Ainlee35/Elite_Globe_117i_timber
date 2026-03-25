@@ -26,7 +26,7 @@ export default function Login() {
       if (success) {
         toast.success("Welcome back!");
         // Check if admin
-        if (form.email === "admin@buildmart.com") {
+        if (form.email === "admin@apexglobe.com") {
           navigate("/admin");
         } else {
           navigate("/");
@@ -45,11 +45,11 @@ export default function Login() {
           <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-xl bg-primary">
             <Hammer className="h-8 w-8 text-primary-foreground" />
           </div>
-          <h2 className="font-heading text-3xl font-bold">BuildMart</h2>
+          <h2 className="font-heading text-3xl font-bold">Apex Globe</h2>
           <p className="mt-3 text-primary-foreground/70">Your trusted partner for premium construction materials</p>
           <div className="mt-8 rounded-lg border border-primary-foreground/10 bg-primary-foreground/5 p-4 text-left text-sm">
             <p className="font-semibold">Demo Accounts:</p>
-            <p className="mt-2 text-primary-foreground/70">Admin: admin@buildmart.com / admin123</p>
+            <p className="mt-2 text-primary-foreground/70">Admin: admin@apexglobe.com / admin123</p>
             <p className="text-primary-foreground/70">Customer: john@example.com / customer123</p>
           </div>
         </motion.div>
@@ -67,7 +67,7 @@ export default function Login() {
               <div className="flex h-9 w-9 items-center justify-center rounded-md bg-primary">
                 <Hammer className="h-5 w-5 text-primary-foreground" />
               </div>
-              <span className="font-heading text-xl font-bold">BuildMart</span>
+              <span className="font-heading text-xl font-bold">Apex Globe</span>
             </div>
           </div>
 

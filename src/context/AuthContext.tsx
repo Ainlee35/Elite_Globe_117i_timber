@@ -12,7 +12,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 const MOCK_USERS: (User & { password: string })[] = [
-  { id: "1", name: "Admin User", email: "admin@buildmart.com", role: "admin", password: "admin123" },
+  { id: "1", name: "Admin User", email: "admin@apexglobe.com", role: "admin", password: "admin123" },
   { id: "2", name: "John Mwangi", email: "john@example.com", role: "customer", password: "customer123" },
 ];
 
