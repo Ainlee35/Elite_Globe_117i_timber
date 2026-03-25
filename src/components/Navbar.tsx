@@ -23,9 +23,9 @@ export default function Navbar() {
       <div className="container flex h-16 items-center justify-between">
         <Link to="/" className="flex items-center gap-2">
           <div className="flex h-9 w-9 items-center justify-center rounded-md bg-primary">
-            <span className="font-heading text-lg font-bold text-primary-foreground">B</span>
+            <span className="font-heading text-lg font-bold text-primary-foreground">A</span>
           </div>
-          <span className="font-heading text-xl font-bold tracking-tight">BuildMart</span>
+          <span className="font-heading text-xl font-bold tracking-tight">Apex Globe</span>
         </Link>
 
         {/* Desktop Nav */}

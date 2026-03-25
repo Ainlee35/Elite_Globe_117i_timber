@@ -11,7 +11,7 @@ export default function Footer() {
               <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary">
                 <Hammer className="h-4 w-4 text-primary-foreground" />
               </div>
-              <span className="font-heading text-lg font-bold">BuildMart</span>
+              <span className="font-heading text-lg font-bold">Apex Globe</span>
             </div>
             <p className="mt-3 text-sm text-accent-foreground/70">
               Your trusted partner for premium construction materials. Quality timber, paints, and architectural designs.
@@ -31,14 +31,14 @@ export default function Footer() {
             <h4 className="font-heading text-sm font-semibold uppercase tracking-wider">Contact</h4>
             <div className="mt-3 flex flex-col gap-2 text-sm text-accent-foreground/70">
               <span className="flex items-center gap-2"><Phone className="h-3.5 w-3.5" /> +255 700 000 000</span>
-              <span className="flex items-center gap-2"><Mail className="h-3.5 w-3.5" /> info@buildmart.co.tz</span>
+              <span className="flex items-center gap-2"><Mail className="h-3.5 w-3.5" /> info@apexglobe.co.tz</span>
               <span className="flex items-center gap-2"><MapPin className="h-3.5 w-3.5" /> Dar es Salaam, Tanzania</span>
             </div>
           </div>
         </div>
 
         <div className="mt-8 border-t border-accent-foreground/10 pt-6 text-center text-xs text-accent-foreground/50">
-          © 2026 BuildMart. All rights reserved.
+          © 2026 Apex Globe. All rights reserved.
         </div>
       </div>
     </footer>
