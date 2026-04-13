@@ -54,7 +54,7 @@ export default function Cart() {
                   className="mb-4 flex gap-4 rounded-lg border bg-card p-4"
                 >
                   <img
-                    src={item.product.image}
+                    src={item.product.image_url}
                     alt={item.product.name}
                     className="h-24 w-24 rounded-md object-cover"
                   />
