@@ -10,31 +10,35 @@ export default function Login() {
   const navigate = useNavigate();
   const [isRegister, setIsRegister] = useState(false);
   const [form, setForm] = useState({ name: "", email: "", password: "" });
+  const [submitting, setSubmitting] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setSubmitting(true);
+
     if (isRegister) {
       if (!form.name || !form.email || !form.password) {
         toast.error("Please fill in all fields");
+        setSubmitting(false);
         return;
       }
-      register(form.name, form.email, form.password);
-      toast.success("Account created!");
-      navigate("/");
-    } else {
-      const success = login(form.email, form.password);
-      if (success) {
-        toast.success("Welcome back!");
-        // Check if admin
-        if (form.email === "admin@apexglobe.com") {
-          navigate("/admin");
-        } else {
-          navigate("/");
-        }
+      const { error } = await register(form.name, form.email, form.password);
+      if (error) {
+        toast.error(error);
       } else {
-        toast.error("Invalid credentials");
+        toast.success("Account created! Check your email to confirm, or log in.");
+        setIsRegister(false);
+      }
+    } else {
+      const { error } = await login(form.email, form.password);
+      if (error) {
+        toast.error(error);
+      } else {
+        toast.success("Welcome back!");
+        navigate("/");
       }
     }
+    setSubmitting(false);
   };
 
   return (
@@ -47,21 +51,12 @@ export default function Login() {
           </div>
           <h2 className="font-heading text-3xl font-bold">Apex Globe</h2>
           <p className="mt-3 text-primary-foreground/70">Your trusted partner for premium construction materials</p>
-          <div className="mt-8 rounded-lg border border-primary-foreground/10 bg-primary-foreground/5 p-4 text-left text-sm">
-            <p className="font-semibold">Demo Accounts:</p>
-            <p className="mt-2 text-primary-foreground/70">Admin: admin@apexglobe.com / admin123</p>
-            <p className="text-primary-foreground/70">Customer: john@example.com / customer123</p>
-          </div>
         </motion.div>
       </div>
 
       {/* Right form */}
       <div className="flex flex-1 items-center justify-center p-6">
-        <motion.div
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          className="w-full max-w-md"
-        >
+        <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="w-full max-w-md">
           <div className="mb-8 lg:hidden">
             <div className="flex items-center gap-2">
               <div className="flex h-9 w-9 items-center justify-center rounded-md bg-primary">
@@ -112,18 +107,16 @@ export default function Login() {
             </div>
             <button
               type="submit"
-              className="h-11 w-full rounded-md bg-primary text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
+              disabled={submitting}
+              className="h-11 w-full rounded-md bg-primary text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50"
             >
-              {isRegister ? "Create Account" : "Sign In"}
+              {submitting ? "Please wait..." : isRegister ? "Create Account" : "Sign In"}
             </button>
           </form>
 
           <p className="mt-6 text-center text-sm text-muted-foreground">
             {isRegister ? "Already have an account?" : "Don't have an account?"}{" "}
-            <button
-              onClick={() => setIsRegister(!isRegister)}
-              className="font-semibold text-primary hover:underline"
-            >
+            <button onClick={() => setIsRegister(!isRegister)} className="font-semibold text-primary hover:underline">
               {isRegister ? "Sign In" : "Sign Up"}
             </button>
           </p>

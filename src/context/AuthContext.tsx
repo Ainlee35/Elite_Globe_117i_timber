@@ -1,49 +1,98 @@
-import { createContext, useContext, useState, ReactNode } from "react";
-import { User } from "@/data/products";
+import { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import type { User as SupabaseUser } from "@supabase/supabase-js";
+
+interface Profile {
+  name: string;
+  email: string;
+  phone: string;
+  address: string;
+}
 
 interface AuthContextType {
-  user: User | null;
-  login: (email: string, password: string) => boolean;
-  register: (name: string, email: string, password: string) => boolean;
-  logout: () => void;
+  user: SupabaseUser | null;
+  profile: Profile | null;
   isAdmin: boolean;
+  loading: boolean;
+  login: (email: string, password: string) => Promise<{ error: string | null }>;
+  register: (name: string, email: string, password: string) => Promise<{ error: string | null }>;
+  logout: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const MOCK_USERS: (User & { password: string })[] = [
-  { id: "1", name: "Admin User", email: "admin@apexglobe.com", role: "admin", password: "admin123" },
-  { id: "2", name: "John Mwangi", email: "john@example.com", role: "customer", password: "customer123" },
-];
-
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<SupabaseUser | null>(null);
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-  const login = (email: string, password: string): boolean => {
-    const found = MOCK_USERS.find(u => u.email === email && u.password === password);
-    if (found) {
-      const { password: _, ...userData } = found;
-      setUser(userData);
-      return true;
-    }
-    return false;
+  const fetchProfile = async (userId: string) => {
+    const { data } = await supabase
+      .from("profiles")
+      .select("name, email, phone, address")
+      .eq("user_id", userId)
+      .single();
+    if (data) setProfile(data);
   };
 
-  const register = (name: string, email: string, _password: string): boolean => {
-    const newUser: User = {
-      id: String(Date.now()),
-      name,
+  const fetchRole = async (userId: string) => {
+    const { data } = await supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", userId);
+    setIsAdmin(data?.some(r => r.role === "admin") ?? false);
+  };
+
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (_event, session) => {
+        const u = session?.user ?? null;
+        setUser(u);
+        if (u) {
+          await fetchProfile(u.id);
+          await fetchRole(u.id);
+        } else {
+          setProfile(null);
+          setIsAdmin(false);
+        }
+        setLoading(false);
+      }
+    );
+
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      const u = session?.user ?? null;
+      setUser(u);
+      if (u) {
+        fetchProfile(u.id);
+        fetchRole(u.id);
+      }
+      setLoading(false);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const login = async (email: string, password: string) => {
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    return { error: error?.message ?? null };
+  };
+
+  const register = async (name: string, email: string, password: string) => {
+    const { error } = await supabase.auth.signUp({
       email,
-      role: "customer",
-    };
-    setUser(newUser);
-    return true;
+      password,
+      options: { data: { name } },
+    });
+    return { error: error?.message ?? null };
   };
 
-  const logout = () => setUser(null);
+  const logout = async () => {
+    await supabase.auth.signOut();
+  };
 
   return (
-    <AuthContext.Provider value={{ user, login, register, logout, isAdmin: user?.role === "admin" }}>
+    <AuthContext.Provider value={{ user, profile, isAdmin, loading, login, register, logout }}>
       {children}
     </AuthContext.Provider>
   );

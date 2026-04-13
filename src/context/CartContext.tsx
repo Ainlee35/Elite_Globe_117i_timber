@@ -1,9 +1,16 @@
 import { createContext, useContext, useState, ReactNode } from "react";
-import { Product, OrderItem } from "@/data/products";
+import { DbProduct } from "@/hooks/useProducts";
+
+export interface CartItem {
+  product: DbProduct;
+  selectedType?: string;
+  quantity: number;
+  unitPrice: number;
+}
 
 interface CartContextType {
-  items: OrderItem[];
-  addItem: (product: Product, selectedType: string | undefined, quantity: number) => void;
+  items: CartItem[];
+  addItem: (product: DbProduct, selectedType: string | undefined, quantity: number) => void;
   removeItem: (index: number) => void;
   updateQuantity: (index: number, quantity: number) => void;
   clearCart: () => void;
@@ -14,9 +21,9 @@ interface CartContextType {
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export function CartProvider({ children }: { children: ReactNode }) {
-  const [items, setItems] = useState<OrderItem[]>([]);
+  const [items, setItems] = useState<CartItem[]>([]);
 
-  const addItem = (product: Product, selectedType: string | undefined, quantity: number) => {
+  const addItem = (product: DbProduct, selectedType: string | undefined, quantity: number) => {
     const type = product.types?.find(t => t.label === selectedType || t.value === selectedType);
     const unitPrice = product.price + (type?.priceModifier || 0);
 

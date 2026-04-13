@@ -1,9 +1,9 @@
 import { Link } from "react-router-dom";
-import { Product } from "@/data/products";
+import { DbProduct } from "@/hooks/useProducts";
 import { motion } from "framer-motion";
 
 interface Props {
-  product: Product;
+  product: DbProduct;
   index?: number;
 }
 
@@ -27,13 +27,13 @@ export default function ProductCard({ product, index = 0 }: Props) {
       >
         <div className="relative aspect-[4/3] overflow-hidden">
           <img
-            src={product.image}
+            src={product.image_url}
             alt={product.name}
             className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
             loading="lazy"
           />
           <span className="absolute left-3 top-3 rounded-md bg-accent px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider text-accent-foreground">
-            {categoryLabels[product.category]}
+            {categoryLabels[product.category] || product.category}
           </span>
         </div>
         <div className="p-4">
@@ -45,7 +45,7 @@ export default function ProductCard({ product, index = 0 }: Props) {
             <span className="font-heading text-lg font-bold text-primary">
               TZS {product.price.toLocaleString()}
             </span>
-            {product.types && (
+            {product.types && product.types.length > 0 && (
               <span className="text-xs text-muted-foreground">
                 {product.types.length} options
               </span>
