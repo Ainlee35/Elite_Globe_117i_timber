@@ -46,17 +46,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (_event, session) => {
+      (_event, session) => {
         const u = session?.user ?? null;
         setUser(u);
         if (u) {
-          await fetchProfile(u.id);
-          await fetchRole(u.id);
+          setTimeout(() => {
+            fetchProfile(u.id);
+            fetchRole(u.id).finally(() => setLoading(false));
+          }, 0);
         } else {
           setProfile(null);
           setIsAdmin(false);
+          setLoading(false);
         }
-        setLoading(false);
       }
     );
 
@@ -65,9 +67,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(u);
       if (u) {
         fetchProfile(u.id);
-        fetchRole(u.id);
+        fetchRole(u.id).finally(() => setLoading(false));
+      } else {
+        setLoading(false);
       }
-      setLoading(false);
     });
 
     return () => subscription.unsubscribe();
