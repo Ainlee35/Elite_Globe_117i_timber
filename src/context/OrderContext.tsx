@@ -41,23 +41,23 @@ interface OrderContextType {
 const OrderContext = createContext<OrderContextType | undefined>(undefined);
 
 export function OrderProvider({ children }: { children: ReactNode }) {
-  const { user, isAdmin } = useAuth();
+  const { user, isAdmin, loading: authLoading } = useAuth();
   const queryClient = useQueryClient();
 
   const { data: orders = [], isLoading: loading } = useQuery({
     queryKey: ["orders", user?.id, isAdmin],
     queryFn: async () => {
       if (!user) return [];
-      const q = supabase
+
+      const { data, error } = await supabase
         .from("orders")
-        .select("*, order_items(*, product:products(id, name, image_url, category)), profile:profiles!orders_user_id_fkey(name, email, phone, address)")
+        .select("*, order_items(*, product:products(id, name, image_url, category))")
         .order("created_at", { ascending: false });
 
-      const { data, error } = await q;
       if (error) throw error;
       return (data ?? []) as unknown as DbOrder[];
     },
-    enabled: !!user,
+    enabled: !!user && !authLoading,
   });
 
   const addOrderMutation = useMutation({

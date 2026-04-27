@@ -28,52 +28,77 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   const fetchProfile = async (userId: string) => {
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from("profiles")
       .select("name, email, phone, address")
       .eq("user_id", userId)
-      .single();
-    if (data) setProfile(data);
+      .maybeSingle();
+
+    if (error) throw error;
+    return data ?? null;
   };
 
   const fetchRole = async (userId: string) => {
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from("user_roles")
       .select("role")
       .eq("user_id", userId);
-    setIsAdmin(data?.some(r => r.role === "admin") ?? false);
+
+    if (error) throw error;
+    return data?.some((r) => r.role === "admin") ?? false;
   };
 
   useEffect(() => {
+    let disposed = false;
+    let requestId = 0;
+
+    const hydrateAuthState = async (nextUser: SupabaseUser | null) => {
+      const currentRequest = ++requestId;
+      setUser(nextUser);
+
+      if (!nextUser) {
+        if (disposed || currentRequest !== requestId) return;
+        setProfile(null);
+        setIsAdmin(false);
+        setLoading(false);
+        return;
+      }
+
+      setLoading(true);
+
+      const [profileResult, roleResult] = await Promise.allSettled([
+        fetchProfile(nextUser.id),
+        fetchRole(nextUser.id),
+      ]);
+
+      if (disposed || currentRequest !== requestId) return;
+
+      setProfile(profileResult.status === "fulfilled" ? profileResult.value : null);
+      setIsAdmin(roleResult.status === "fulfilled" ? roleResult.value : false);
+      setLoading(false);
+    };
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (_event, session) => {
-        const u = session?.user ?? null;
-        setUser(u);
-        if (u) {
-          setTimeout(() => {
-            fetchProfile(u.id);
-            fetchRole(u.id).finally(() => setLoading(false));
-          }, 0);
-        } else {
-          setProfile(null);
-          setIsAdmin(false);
-          setLoading(false);
-        }
+        void hydrateAuthState(session?.user ?? null);
       }
     );
 
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    void supabase.auth.getSession().then(({ data: { session } }) => {
+      if (disposed) return;
       const u = session?.user ?? null;
-      setUser(u);
-      if (u) {
-        fetchProfile(u.id);
-        fetchRole(u.id).finally(() => setLoading(false));
-      } else {
+      if (!u) {
         setLoading(false);
+        return;
       }
+
+      void hydrateAuthState(u);
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      disposed = true;
+      subscription.unsubscribe();
+    };
   }, []);
 
   const login = async (email: string, password: string) => {
@@ -85,7 +110,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const { error } = await supabase.auth.signUp({
       email,
       password,
-      options: { data: { name } },
+      options: {
+        data: { name },
+        emailRedirectTo: window.location.origin,
+      },
     });
     return { error: error?.message ?? null };
   };
