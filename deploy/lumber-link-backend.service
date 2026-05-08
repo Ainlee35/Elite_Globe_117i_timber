@@ -1,0 +1,17 @@
+[Unit]
+Description=Lumber Link Spring Boot Backend
+After=network.target docker.service
+Requires=docker.service
+
+[Service]
+Type=simple
+User=ubuntu
+WorkingDirectory=/opt/lumber-link/backend
+EnvironmentFile=/opt/lumber-link/backend/.env
+ExecStart=/usr/bin/java -jar /opt/lumber-link/backend/lumber-link-backend-0.0.1-SNAPSHOT.jar
+SuccessExitStatus=143
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
